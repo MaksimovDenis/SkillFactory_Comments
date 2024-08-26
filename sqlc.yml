@@ -1,0 +1,11 @@
+version: "2"
+sql:
+  - name: "queries"
+    engine: "postgresql"
+    queries: "internal/storage/queries_src"
+    schema: "internal/storage/migrations"
+    gen:
+      go:
+        package: "storage"
+        out: "internal/storage/queries"
+        sql_package: "pgx/v5"
