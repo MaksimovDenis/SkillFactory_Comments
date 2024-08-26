@@ -4,7 +4,6 @@ import (
 	"context"
 	"skillfactory/finalProject/commentsService/internal/storage/queries"
 
-	_ "github.com/jackc/pgx/v4/stdlib" // pgx
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 )
