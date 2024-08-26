@@ -1,11 +1,9 @@
 package storage
 
 import (
-	"database/sql"
-
 	"context"
+	"skillfactory/finalProject/commentsService/internal/storage/queries"
 
-	"git.mobiledep.ru/flagshtok/backend/controller/storage/queries"
 	_ "github.com/jackc/pgx/v4/stdlib" // pgx
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
@@ -13,7 +11,6 @@ import (
 
 // Storage postgresql datastore wrapper
 type Storage struct {
-	dbh     *sql.DB
 	l       zerolog.Logger
 	pg      *pgxpool.Pool
 	Queries *queries.Queries
@@ -37,26 +34,19 @@ func NewStorage(ctx context.Context, pgConnString string, log zerolog.Logger) (*
 		return nil, err
 	}
 
-	dbConn, err := sql.Open("pgx", pgConnString)
-	if err != nil {
-		return nil, err
-	}
-
-	dbConn.SetMaxOpenConns(5)
-	dbConn.SetMaxIdleConns(1)
-
 	hdl := &Storage{
-		dbh: dbConn,
-		l:   log,
-		pg:  pgConn,
+		l:  log,
+		pg: pgConn,
 	}
 
-	return db, nil
+	hdl.Queries = queries.New(pgConn)
+
+	return hdl, nil
 }
 
-func (repo *Repository) StopPG() {
-	if repo.PostgresDB != nil {
-		repo.Log.Info().Msg("closing PostgreSQL connection pool")
-		repo.PostgresDB.Close()
+func (hdl *Storage) StopPG() {
+	if hdl.pg != nil {
+		hdl.l.Info().Msg("closing PostgreSQL connection pool")
+		hdl.pg.Close()
 	}
 }
