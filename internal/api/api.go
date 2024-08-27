@@ -66,6 +66,8 @@ func NewAPI(opts *Opts) (*API, error) {
 	oapi.RegisterHandlersWithOptions(router, api, oapi.GinServerOptions{
 		BaseURL: "/api",
 	})
+
+	return api, nil
 }
 
 func (hdl *API) Serve() {
@@ -83,11 +85,4 @@ func (hdl *API) Stop() {
 	if err := hdl.server.Shutdown(ctx); err != nil && err != http.ErrServerClosed {
 		hdl.l.Error().Err(err).Msg("failed to stop api server")
 	}
-}
-
-func (hdl *API) internalError(ctx *gin.Context, err error, msg string) {
-	hdl.l.Error().Err(err).Msg(msg)
-
-	resp := oapi.InternalError{Msg: msg}
-	ctx.JSON(http.StatusInternalServerError, resp)
 }
