@@ -7,5 +7,5 @@ import (
 )
 
 func (api *API) GetSwagger(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, api.swaggerFile)
+	ctx.String(http.StatusOK, string(api.swaggerFile))
 }

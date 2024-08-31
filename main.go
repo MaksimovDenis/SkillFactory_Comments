@@ -29,12 +29,17 @@ func main() {
 
 	fmt.Println(cfg)
 
-	logLevel, err := zerolog.ParseLevel(cfg.LogLevel)
+	logLevel, err := zerolog.ParseLevel("debug")
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to parse log level")
 	}
 
 	logger := zerolog.New(os.Stdout).Level(logLevel).With().Timestamp().Logger()
+
+	logger.Debug().Msg("This is a debug message")
+	logger.Info().Msg("This is an info message")
+	logger.Warn().Msg("This is a warning message")
+	logger.Error().Msg("This is an error message")
 
 	ctx := context.Background()
 

@@ -66,5 +66,11 @@ func (api *API) GetAllComments(ctx *gin.Context) {
 		res.JSON200 = &list
 	}
 
-	ctx.JSON(http.StatusOK, res)
+	ctx.Header("Content-type", "application/json")
+
+	if res.JSON200 != nil {
+		ctx.JSON(http.StatusOK, res.JSON200)
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{"message": "No comments found"})
+	}
 }

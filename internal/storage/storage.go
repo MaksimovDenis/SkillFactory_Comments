@@ -30,6 +30,7 @@ func NewStorage(ctx context.Context, pgConnString string, log zerolog.Logger) (*
 	}
 
 	if err := migration(pgConnString); err != nil {
+		log.Error().Err(err).Msg("failed to init migrations")
 		return nil, err
 	}
 

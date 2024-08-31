@@ -28,6 +28,16 @@ func (q *Queries) CreateComments(ctx context.Context, arg CreateCommentsParams) 
 	return err
 }
 
+const deleteComment = `-- name: DeleteComment :exec
+DELETE FROM comments 
+WHERE id = $1
+`
+
+func (q *Queries) DeleteComment(ctx context.Context, id int32) error {
+	_, err := q.db.Exec(ctx, deleteComment, id)
+	return err
+}
+
 const getAllComments = `-- name: GetAllComments :many
 SELECT id, news_id, parent_comment_id, content, created_at 
 FROM comments

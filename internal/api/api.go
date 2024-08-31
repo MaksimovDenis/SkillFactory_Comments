@@ -58,14 +58,18 @@ func NewAPI(opts *Opts) (*API, error) {
 			Addr:    opts.Addr,
 			Handler: router,
 		},
-		router:  router,
-		storage: opts.Storage,
+		router:      router,
+		storage:     opts.Storage,
+		swaggerFile: opts.SwaggerFile,
 	}
 
 	router.Use(middleware.OapiRequestValidatorWithOptions(swagger, oapiOpts))
+
 	oapi.RegisterHandlersWithOptions(router, api, oapi.GinServerOptions{
 		BaseURL: "/api",
 	})
+
+	go api.StartCensorship()
 
 	return api, nil
 }
