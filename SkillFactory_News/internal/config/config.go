@@ -7,8 +7,8 @@ import (
 )
 
 type Config struct {
-	APIPort      string `default:"8882"`
-	PgConnString string `default:"postgres://admin:admin@localhost:5432/comments?sslmode=disable"`
+	APIPort      string `default:"8883"`
+	PgConnString string `default:"postgres://admin:admin@localhost:5433/news?sslmode=disable"`
 	LogLevel     string `default:"debug"`
 }
 

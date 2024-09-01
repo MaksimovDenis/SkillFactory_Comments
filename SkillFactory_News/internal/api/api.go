@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MaksimovDenis/SkillFactory_Comments/internal/storage"
+	storage "github.com/MaksimovDenis/SkillFactory_News/internal/storage"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -29,10 +29,8 @@ type API struct {
 	storage *storage.Storage
 }
 
-func NewAPI(opts *Opts) (*API, error) {
+func NewAPI(opts *Opts) *API {
 	router := gin.Default()
-
-	router.MaxMultipartMemory = FileUploadBufferSize
 
 	api := &API{
 		l: opts.Log,
@@ -44,16 +42,17 @@ func NewAPI(opts *Opts) (*API, error) {
 		storage: opts.Storage,
 	}
 
-	go api.StartCensorship()
+	go api.StartParseUrl()
 
 	api.setupEndpoints()
 
-	return api, nil
+	return api
 }
 
 func (api *API) setupEndpoints() {
-	api.router.GET("api/comments", api.GetAllComments)
-	api.router.POST("api/comments", api.CreateComment)
+	api.router.GET("api/feeds/:limit", api.Feeds)
+	api.router.GET("api/feed/:id", api.FeedById)
+	api.router.POST("api/feeds", api.FeedsByFilter)
 }
 
 func (api *API) Serve() error {
@@ -64,11 +63,11 @@ func (api *API) Serve() error {
 	return nil
 }
 
-func (hdl *API) Stop() {
-	ctx, cancel := context.WithTimeout(context.Background(), ServerShutdownDefaultDelay)
+func (api *API) Stop(ctx context.Context) {
+	ctx, cancel := context.WithTimeout(ctx, ServerShutdownDefaultDelay)
 	defer cancel()
 
-	if err := hdl.server.Shutdown(ctx); err != nil && err != http.ErrServerClosed {
-		hdl.l.Error().Err(err).Msg("failed to stop api server")
+	if err := api.server.Shutdown(ctx); err != nil && err != http.ErrServerClosed {
+		api.l.Error().Err(err).Msg("failed to stop api server")
 	}
 }

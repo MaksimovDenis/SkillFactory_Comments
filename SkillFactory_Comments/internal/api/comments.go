@@ -3,7 +3,6 @@ package api
 import (
 	"net/http"
 
-	"github.com/MaksimovDenis/SkillFactory_Comments/internal/api/oapi"
 	"github.com/MaksimovDenis/SkillFactory_Comments/internal/storage"
 	"github.com/MaksimovDenis/SkillFactory_Comments/internal/storage/queries"
 
@@ -44,33 +43,22 @@ func (api *API) GetAllComments(ctx *gin.Context) {
 		return
 	}
 
-	res := oapi.GetAllCommentsResponse{}
+	dataList := make([]storage.Comment, len(comments))
 
 	if len(comments) != 0 {
-		list := make([]oapi.Comment, len(comments))
 
 		for idx, val := range comments {
-			comment := oapi.Comment{
-				Id:      int(val.ID),
-				NewsId:  int(val.NewsID.Int32),
-				Content: val.Content,
+			comment := storage.Comment{
+				ID:              val.ID,
+				NewsID:          val.NewsID,
+				ParentCommentID: val.ParentCommentID,
+				Content:         val.Content,
 			}
 
-			if val.ParentCommentID.Int32 != 0 {
-				parentID := int(val.ParentCommentID.Int32)
-				comment.ParentCommentId = &parentID
-			}
-
-			list[idx] = comment
+			dataList[idx] = comment
 		}
 
-		res.JSON200 = &list
-	}
-
-	ctx.Header("Content-type", "application/json")
-
-	if res.JSON200 != nil {
-		ctx.JSON(http.StatusOK, res.JSON200)
+		ctx.JSON(http.StatusOK, dataList)
 	} else {
 		ctx.JSON(http.StatusOK, gin.H{"message": "No comments found"})
 	}

@@ -32,7 +32,7 @@ type Comment struct {
 	NewsId int `json:"news_id"`
 
 	// ParentCommentId ID of the parent comment (if any)
-	ParentCommentId *int `json:"parent_comment_id"`
+	ParentCommentId *int `json:"parent_comment_id,omitempty"`
 }
 
 // CreateComment defines model for CreateComment.
@@ -585,15 +585,15 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/9RUzW7bPBB8FWK/79ACgqW2N95SFyhy7jEwAoZa2UwokuWuGxiG3r1Y/Tmq7TQ99NCb",
-	"oN1ZzswOeQQb2xQDBibQRyC7w9b0n+vYthhYPlOOCTM77As2Bh4LNZLNLrGLATSsh4KKjeIdKjsOKIAP",
-	"CUEDcXZhC10Brj5H3365CnSBcYtZkAGf6f51uCGK1hnGWkm3coztxVnJZAx8Px73m6lD88RNvXONMuHw",
-	"HgoIe+/Ng0fQnPd4flBXQMbve5exBn0n2k8yitnNzQyMD49oWQiuMxrGv7mIf9/OtzgpGBeaOJlmbG/a",
-	"PnvQsGNOuizpyXnfGMsxH0qRs2Q+EiVlkhP1joXh/BsK+IGZht5qVa0+yIiYMEi/hk+ralWBeMS7fnfl",
-	"jNRH2OKFJX5FVsb7ySJaQT8wG6nf1kPHjffrE4WMlGKgIR0fq+qXkJiUvLM9vnwkOWS68PIle+2B/2ds",
-	"QMN/5elpKMd3oZyy2M0em5zNYbB4yf9GeUd9Bmep0sRmS7K3+edGohPpUoz7+E/wc/3L6zHEAok/x/rw",
-	"R8pfFbw4o1umTwLaXbZ9qSQ+XdPeFVDSs9lKtK8l4dtQV43zeCkEYx3ewsSengZ6OfYlvZTjAwq3rgDC",
-	"LMEGfTfdl1IS3W3m9iME0y7uQrfpfgYAAP//44YX6VgGAAA=",
+	"H4sIAAAAAAAC/8xUTW8TMRD9K9bAAaRVNsDNtxIk1DPHKqpc72zi1msbz4Qqiva/o9mvdOmmLQckbpZn",
+	"3vi952efwMYmxYCBCfQJyO6xMd1yE5sGA8sy5Zgws8OuYGPgoVAh2ewSuxhAw6YvqFgr3qOyw4AC+JgQ",
+	"NBBnF3bQFuCq5+jrbxeBLjDuMAsy4CPdvgw3RNE6w1gp6VaOsVmclUzGwLfDca9M7ZtHbuqDq5UJx48L",
+	"g9sCMv48uIwV6BvReqZdTO5tJ2C8u0fLQmiT0TD+S+P/Q/vCwXtz5xE05wO+audbnBSMC3UcTTO2M+2Q",
+	"PWjYMyddlvTgvK+N5ZiPpciZMx+IkjLJiXrHwnDahgJ+Yaa+d71arz7JiJgwSL+GL6v1ag3iEe+7uysn",
+	"pD7BDhcu8TuyMt6PFtEKuoHZSP266juuvN+cKWSkFAP16fi8Xv8REpOSd7bDl/ckh4wPXFZyrx3wfcYa",
+	"NLwrz19BOfwD5ZjFdvLY5GyOvcVz/lfKO+oyOEmVJjY7knubNrcSnUhLMe7iP8Kf658/jz4WSPw1Vse/",
+	"Uv6i4NkZ7Tx9EtB22fa5kvhwSXtbQEmPZifRvpSEH31d1c7jUgiGOryFiT1/DfR07FN6Kcc7FG5tAYRZ",
+	"gg36ZnwvpSS63U7tJwimmb2Fdtv+DgAA//9km3N2SAYAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

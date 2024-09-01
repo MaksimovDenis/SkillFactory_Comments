@@ -2,31 +2,27 @@ package main
 
 import (
 	"context"
-	_ "embed"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/MaksimovDenis/SkillFactory_Comments/internal/api"
-	"github.com/MaksimovDenis/SkillFactory_Comments/internal/config"
-	"github.com/MaksimovDenis/SkillFactory_Comments/internal/storage"
+	"github.com/MaksimovDenis/SkillFactory_News/internal/api"
+	"github.com/MaksimovDenis/SkillFactory_News/internal/config"
+	"github.com/MaksimovDenis/SkillFactory_News/internal/storage"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
-//go:generate sqlc generate
-
 func main() {
+
 	cfg, err := config.InitConfig()
 	if err != nil {
 		log.Panic().Err(err).Msg("failed to init config")
 	}
 
-	fmt.Println(cfg)
-
-	logLevel, err := zerolog.ParseLevel("debug")
+	logLevel, err := zerolog.ParseLevel(cfg.LogLevel)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to parse log level")
 	}
@@ -37,10 +33,12 @@ func main() {
 
 	dbLog := logger.With().Str("module", "storage").Logger()
 
-	storage, err := storage.NewStorage(ctx, cfg.PgConnString, dbLog)
+	db, err := storage.NewPostgres(ctx, cfg.PgConnString, dbLog)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("failed to init database")
 	}
+
+	storage := storage.NewRepository(ctx, db, dbLog)
 
 	apiLog := logger.With().Str("module", "api").Logger()
 	fmt.Println(cfg.APIPort)
@@ -51,10 +49,7 @@ func main() {
 		Storage: storage,
 	}
 
-	server, err := api.NewAPI(APIConfig)
-	if err != nil {
-		logger.Fatal().Err(err).Msg("Failed to start server")
-	}
+	server := api.NewAPI(APIConfig)
 
 	go func() {
 		err := server.Serve()
@@ -65,7 +60,7 @@ func main() {
 
 	sigs := make(chan os.Signal, 1)
 
-	signal.Notify(sigs, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGINT, syscall.SIGABRT)
 
 	logger.Info().Msg("awaiting signal")
 
@@ -73,7 +68,7 @@ func main() {
 
 	log.Info().Str("signal", sig.String()).Msg("signal received")
 
-	server.Stop()
+	server.Stop(context.Background())
 	storage.StopPG()
 
 	logger.Info().Msg("exiting")
