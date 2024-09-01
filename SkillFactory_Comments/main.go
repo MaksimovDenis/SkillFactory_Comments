@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/api"
-	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/config"
-	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/storage"
+	"github.com/MaksimovDenis/SkillFactory_Comments/internal/api"
+	"github.com/MaksimovDenis/SkillFactory_Comments/internal/config"
+	"github.com/MaksimovDenis/SkillFactory_Comments/internal/storage"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

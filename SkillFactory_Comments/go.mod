@@ -1,4 +1,4 @@
-module github.com/MaksimovDenis/SkillFactory_finalProject
+module github.com/MaksimovDenis/SkillFactory_Comments
 
 go 1.22.4
 

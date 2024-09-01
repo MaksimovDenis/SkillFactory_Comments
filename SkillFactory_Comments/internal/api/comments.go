@@ -3,9 +3,9 @@ package api
 import (
 	"net/http"
 
-	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/api/oapi"
-	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/storage"
-	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/storage/queries"
+	"github.com/MaksimovDenis/SkillFactory_Comments/internal/api/oapi"
+	"github.com/MaksimovDenis/SkillFactory_Comments/internal/storage"
+	"github.com/MaksimovDenis/SkillFactory_Comments/internal/storage/queries"
 
 	"github.com/gin-gonic/gin"
 )

@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 
-	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/storage/queries"
+	"github.com/MaksimovDenis/SkillFactory_Comments/internal/storage/queries"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"

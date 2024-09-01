@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/api/oapi"
-	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/storage"
+	"github.com/MaksimovDenis/SkillFactory_Comments/internal/api/oapi"
+	"github.com/MaksimovDenis/SkillFactory_Comments/internal/storage"
 
 	middleware "github.com/deepmap/oapi-codegen/pkg/gin-middleware"
 
