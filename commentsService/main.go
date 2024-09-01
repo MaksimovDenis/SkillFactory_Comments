@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"skillfactory/finalProject/commentsService/internal/api"
-	"skillfactory/finalProject/commentsService/internal/config"
-	"skillfactory/finalProject/commentsService/internal/storage"
 	"syscall"
+
+	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/api"
+	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/config"
+	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/storage"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

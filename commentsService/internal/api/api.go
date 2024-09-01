@@ -3,9 +3,10 @@ package api
 import (
 	"context"
 	"net/http"
-	"skillfactory/finalProject/commentsService/internal/api/oapi"
-	"skillfactory/finalProject/commentsService/internal/storage"
 	"time"
+
+	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/api/oapi"
+	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/storage"
 
 	middleware "github.com/deepmap/oapi-codegen/pkg/gin-middleware"
 

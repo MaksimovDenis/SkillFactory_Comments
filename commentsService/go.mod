@@ -1,4 +1,4 @@
-module skillfactory/finalProject/commentsService
+module github.com/MaksimovDenis/SkillFactory_finalProject
 
 go 1.22.4
 

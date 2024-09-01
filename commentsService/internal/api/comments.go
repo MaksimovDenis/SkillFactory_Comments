@@ -2,9 +2,10 @@ package api
 
 import (
 	"net/http"
-	"skillfactory/finalProject/commentsService/internal/api/oapi"
-	"skillfactory/finalProject/commentsService/internal/storage"
-	"skillfactory/finalProject/commentsService/internal/storage/queries"
+
+	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/api/oapi"
+	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/storage"
+	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/storage/queries"
 
 	"github.com/gin-gonic/gin"
 )

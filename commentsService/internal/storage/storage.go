@@ -2,7 +2,8 @@ package storage
 
 import (
 	"context"
-	"skillfactory/finalProject/commentsService/internal/storage/queries"
+
+	"github.com/MaksimovDenis/SkillFactory_finalProject/internal/storage/queries"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
