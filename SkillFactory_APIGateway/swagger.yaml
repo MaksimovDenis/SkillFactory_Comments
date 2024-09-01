@@ -1,0 +1,61 @@
+openapi: "3.0.0"
+info:
+  version: 0.0.1
+  title: comments
+  description: comments api
+  contact:
+    url: http://skillfactory/
+
+servers:
+  - url: /api
+
+tags:
+  - name: comments
+
+paths:
+  /comments:
+
+    post:
+      description: Create comment.
+      operationId: createComment
+      tags:
+        - comments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateComment'
+      responses:
+        '200':
+          description: ok
+
+  /swagger:
+    get:
+      description: Swagger file
+      operationId: getSwagger
+      tags:
+        - probe
+      responses:
+        '200':
+          description: content of swagger file
+
+components:
+  schemas:
+    CreateComment:
+      type: object
+      properties:
+        news_id:
+          type: integer
+          description: ID of the associated news item
+        parent_comment_id:
+          type: integer
+          description: ID of the parent comment (if any)
+          nullable: true
+        content:
+          type: string
+          description: Content of the comment
+      required:
+        - news_id
+        - content
+
