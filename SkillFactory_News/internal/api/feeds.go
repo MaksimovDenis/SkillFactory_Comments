@@ -35,7 +35,7 @@ func (api *API) Feeds(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, feeds)
 }
 
-func (api *API) FeedById(ctx *gin.Context) {
+func (api *API) FeedsById(ctx *gin.Context) {
 	queryId := ctx.Param("id")
 
 	id, err := strconv.Atoi(queryId)

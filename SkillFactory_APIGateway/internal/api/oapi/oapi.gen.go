@@ -18,6 +18,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gin-gonic/gin"
+	"github.com/oapi-codegen/runtime"
 )
 
 // Comment defines model for Comment.
@@ -47,8 +48,50 @@ type CreateComment struct {
 	ParentCommentId *int `json:"parent_comment_id"`
 }
 
+// Feeds defines model for Feeds.
+type Feeds struct {
+	// Content Content of the feeds
+	Content string `json:"content"`
+
+	// Id Feeds ID
+	Id int `json:"id"`
+
+	// Link Link of the feeds
+	Link string `json:"link"`
+
+	// PubDate Publication date
+	PubDate string `json:"pub_date"`
+
+	// Title Title of feeds (if any)
+	Title string `json:"title"`
+}
+
+// FeedsByFilter defines model for FeedsByFilter.
+type FeedsByFilter struct {
+	// Filter Filter contains string that will find all comments which title or content include this string
+	Filter string `json:"filter"`
+
+	// Limit Length of feeds list
+	Limit int `json:"limit"`
+}
+
+// ID defines model for ID.
+type ID = int64
+
+// Limit defines model for Limit.
+type Limit = int64
+
+// FeedsParams defines parameters for Feeds.
+type FeedsParams struct {
+	// Limit maximum number of results to return
+	Limit *Limit `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // CreateCommentJSONRequestBody defines body for CreateComment for application/json ContentType.
 type CreateCommentJSONRequestBody = CreateComment
+
+// FeedsByFilterJSONRequestBody defines body for FeedsByFilter for application/json ContentType.
+type FeedsByFilterJSONRequestBody = FeedsByFilter
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -131,6 +174,17 @@ type ClientInterface interface {
 
 	CreateComment(ctx context.Context, body CreateCommentJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// Feeds request
+	Feeds(ctx context.Context, params *FeedsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// FeedsByFilterWithBody request with any body
+	FeedsByFilterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	FeedsByFilter(ctx context.Context, body FeedsByFilterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// FeedsById request
+	FeedsById(ctx context.Context, id ID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetSwagger request
 	GetSwagger(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
@@ -161,6 +215,54 @@ func (c *Client) CreateCommentWithBody(ctx context.Context, contentType string, 
 
 func (c *Client) CreateComment(ctx context.Context, body CreateCommentJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateCommentRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) Feeds(ctx context.Context, params *FeedsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewFeedsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) FeedsByFilterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewFeedsByFilterRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) FeedsByFilter(ctx context.Context, body FeedsByFilterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewFeedsByFilterRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) FeedsById(ctx context.Context, id ID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewFeedsByIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -250,6 +352,129 @@ func NewCreateCommentRequestWithBody(server string, contentType string, body io.
 	return req, nil
 }
 
+// NewFeedsRequest generates requests for Feeds
+func NewFeedsRequest(server string, params *FeedsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/feeds")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewFeedsByFilterRequest calls the generic FeedsByFilter builder with application/json body
+func NewFeedsByFilterRequest(server string, body FeedsByFilterJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewFeedsByFilterRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewFeedsByFilterRequestWithBody generates requests for FeedsByFilter with any type of body
+func NewFeedsByFilterRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/feeds")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewFeedsByIdRequest generates requests for FeedsById
+func NewFeedsByIdRequest(server string, id ID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/feeds/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetSwaggerRequest generates requests for GetSwagger
 func NewGetSwaggerRequest(server string) (*http.Request, error) {
 	var err error
@@ -328,6 +553,17 @@ type ClientWithResponsesInterface interface {
 
 	CreateCommentWithResponse(ctx context.Context, body CreateCommentJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateCommentResponse, error)
 
+	// FeedsWithResponse request
+	FeedsWithResponse(ctx context.Context, params *FeedsParams, reqEditors ...RequestEditorFn) (*FeedsResponse, error)
+
+	// FeedsByFilterWithBodyWithResponse request with any body
+	FeedsByFilterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*FeedsByFilterResponse, error)
+
+	FeedsByFilterWithResponse(ctx context.Context, body FeedsByFilterJSONRequestBody, reqEditors ...RequestEditorFn) (*FeedsByFilterResponse, error)
+
+	// FeedsByIdWithResponse request
+	FeedsByIdWithResponse(ctx context.Context, id ID, reqEditors ...RequestEditorFn) (*FeedsByIdResponse, error)
+
 	// GetSwaggerWithResponse request
 	GetSwaggerWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerResponse, error)
 }
@@ -369,6 +605,72 @@ func (r CreateCommentResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r CreateCommentResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type FeedsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]Feeds
+}
+
+// Status returns HTTPResponse.Status
+func (r FeedsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r FeedsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type FeedsByFilterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]Feeds
+}
+
+// Status returns HTTPResponse.Status
+func (r FeedsByFilterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r FeedsByFilterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type FeedsByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r FeedsByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r FeedsByIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -422,6 +724,41 @@ func (c *ClientWithResponses) CreateCommentWithResponse(ctx context.Context, bod
 	return ParseCreateCommentResponse(rsp)
 }
 
+// FeedsWithResponse request returning *FeedsResponse
+func (c *ClientWithResponses) FeedsWithResponse(ctx context.Context, params *FeedsParams, reqEditors ...RequestEditorFn) (*FeedsResponse, error) {
+	rsp, err := c.Feeds(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseFeedsResponse(rsp)
+}
+
+// FeedsByFilterWithBodyWithResponse request with arbitrary body returning *FeedsByFilterResponse
+func (c *ClientWithResponses) FeedsByFilterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*FeedsByFilterResponse, error) {
+	rsp, err := c.FeedsByFilterWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseFeedsByFilterResponse(rsp)
+}
+
+func (c *ClientWithResponses) FeedsByFilterWithResponse(ctx context.Context, body FeedsByFilterJSONRequestBody, reqEditors ...RequestEditorFn) (*FeedsByFilterResponse, error) {
+	rsp, err := c.FeedsByFilter(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseFeedsByFilterResponse(rsp)
+}
+
+// FeedsByIdWithResponse request returning *FeedsByIdResponse
+func (c *ClientWithResponses) FeedsByIdWithResponse(ctx context.Context, id ID, reqEditors ...RequestEditorFn) (*FeedsByIdResponse, error) {
+	rsp, err := c.FeedsById(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseFeedsByIdResponse(rsp)
+}
+
 // GetSwaggerWithResponse request returning *GetSwaggerResponse
 func (c *ClientWithResponses) GetSwaggerWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerResponse, error) {
 	rsp, err := c.GetSwagger(ctx, reqEditors...)
@@ -473,6 +810,84 @@ func ParseCreateCommentResponse(rsp *http.Response) (*CreateCommentResponse, err
 	return response, nil
 }
 
+// ParseFeedsResponse parses an HTTP response from a FeedsWithResponse call
+func ParseFeedsResponse(rsp *http.Response) (*FeedsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &FeedsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Feeds
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseFeedsByFilterResponse parses an HTTP response from a FeedsByFilterWithResponse call
+func ParseFeedsByFilterResponse(rsp *http.Response) (*FeedsByFilterResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &FeedsByFilterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Feeds
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseFeedsByIdResponse parses an HTTP response from a FeedsByIdWithResponse call
+func ParseFeedsByIdResponse(rsp *http.Response) (*FeedsByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &FeedsByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetSwaggerResponse parses an HTTP response from a GetSwaggerWithResponse call
 func ParseGetSwaggerResponse(rsp *http.Response) (*GetSwaggerResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -497,6 +912,15 @@ type ServerInterface interface {
 
 	// (POST /comments)
 	CreateComment(c *gin.Context)
+
+	// (GET /feeds)
+	Feeds(c *gin.Context, params FeedsParams)
+
+	// (POST /feeds)
+	FeedsByFilter(c *gin.Context)
+
+	// (GET /feeds/{id})
+	FeedsById(c *gin.Context, id ID)
 
 	// (GET /swagger)
 	GetSwagger(c *gin.Context)
@@ -535,6 +959,69 @@ func (siw *ServerInterfaceWrapper) CreateComment(c *gin.Context) {
 	}
 
 	siw.Handler.CreateComment(c)
+}
+
+// Feeds operation middleware
+func (siw *ServerInterfaceWrapper) Feeds(c *gin.Context) {
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params FeedsParams
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", c.Request.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter limit: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.Feeds(c, params)
+}
+
+// FeedsByFilter operation middleware
+func (siw *ServerInterfaceWrapper) FeedsByFilter(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.FeedsByFilter(c)
+}
+
+// FeedsById operation middleware
+func (siw *ServerInterfaceWrapper) FeedsById(c *gin.Context) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id ID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", c.Param("id"), &id, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.FeedsById(c, id)
 }
 
 // GetSwagger operation middleware
@@ -579,21 +1066,31 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 
 	router.GET(options.BaseURL+"/comments", wrapper.GetAllComments)
 	router.POST(options.BaseURL+"/comments", wrapper.CreateComment)
+	router.GET(options.BaseURL+"/feeds", wrapper.Feeds)
+	router.POST(options.BaseURL+"/feeds", wrapper.FeedsByFilter)
+	router.GET(options.BaseURL+"/feeds/:id", wrapper.FeedsById)
 	router.GET(options.BaseURL+"/swagger", wrapper.GetSwagger)
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"Qb0ykuHgNMsfun8DAAD//9ifvpMLDgAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

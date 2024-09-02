@@ -1,18 +1,78 @@
 openapi: "3.0.0"
 info:
   version: 0.0.1
-  title: comments
-  description: comments api
+  title: skillfactory_final_project
+  description: GO-35 Maksimov Denis
   contact:
-    url: http://skillfactory/
+    url: https://skillfactory.ru/
 
 servers:
   - url: /api
 
 tags:
+  - name: feeds
   - name: comments
 
 paths:
+  /feeds:
+
+    post:
+      description: Feeds by filter.
+      operationId: feedsByFilter
+      tags:
+        - feeds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedsByFilter'
+      responses:
+        '200':
+          description: A filtred feeds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feeds'
+
+    get:
+      description: Get all feeds.
+      operationId: feeds
+      tags:
+        - feeds
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        '200':
+          description: List of feeds.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feeds'
+
+  /feeds/{id}:
+
+    get:
+      description: Get feed by id.
+      operationId: feedsById
+      tags:
+        - feeds
+      parameters:
+        - $ref: "#/components/parameters/ID"
+      responses:
+        '200':
+          description: Feeds by id.
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/Feeds'
+
   /comments:
 
     get:
@@ -93,3 +153,61 @@ components:
       required:
         - news_id
         - content
+
+    Feeds:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Feeds ID
+        title:
+          type: string
+          description: Title of feeds (if any)
+        content:
+          type: string
+          description: Content of the feeds
+        link:
+          type: string
+          description: Link of the feeds
+        pub_date:
+          type: string
+          description: Publication date
+      required:
+        - id
+        - title
+        - content
+        - link
+        - pub_date
+
+    FeedsByFilter:
+      type: object
+      properties:
+        limit:
+          type: integer
+          description: Length of feeds list
+        filter:
+          type: string
+          description: Filter contains string that will find all comments which title or content include this string
+      required:
+        - limit
+        - filter
+
+  parameters:
+    ID:
+      name: id
+      in: path
+      description: id of object
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+    Limit:
+      name: limit
+      in: query
+      description: maximum number of results to return
+      required: false
+      schema:
+        type: integer
+        format: int64
+        default: 10
