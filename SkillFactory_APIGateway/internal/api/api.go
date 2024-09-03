@@ -44,8 +44,6 @@ func NewAPI(opts *Opts) (*API, error) {
 		},
 	}
 
-	router = gin.Default()
-
 	router.MaxMultipartMemory = FileUploadBufferSize
 
 	api := &API{

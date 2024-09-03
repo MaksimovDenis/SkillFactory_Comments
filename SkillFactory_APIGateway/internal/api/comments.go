@@ -31,14 +31,21 @@ func (api *API) CreateComment(ctx *gin.Context) {
 		return
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	res, err := oapi.ParseCreateCommentResponse(resp)
 	if err != nil {
 		api.l.Error().Err(err).Msg("Failed to read response body")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response body"})
 		return
 	}
 
-	ctx.Data(resp.StatusCode, "application/json", body)
+	/*body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		api.l.Error().Err(err).Msg("Failed to read response body")
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response body"})
+		return
+	}*/
+
+	ctx.Data(resp.StatusCode, "application/json", res.Body)
 }
 
 func (api *API) GetAllComments(ctx *gin.Context) {

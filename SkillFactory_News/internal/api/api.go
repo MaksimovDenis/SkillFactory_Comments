@@ -50,8 +50,8 @@ func NewAPI(opts *Opts) *API {
 }
 
 func (api *API) setupEndpoints() {
-	api.router.GET("api/feeds/:limit", api.Feeds)
-	api.router.GET("api/feed/:id", api.FeedsById)
+	api.router.GET("api/feeds", api.Feeds)
+	api.router.GET("api/feeds/:id", api.FeedsById)
 	api.router.POST("api/feeds", api.FeedsByFilter)
 }
 

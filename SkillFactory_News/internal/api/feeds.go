@@ -9,7 +9,7 @@ import (
 )
 
 func (api *API) Feeds(ctx *gin.Context) {
-	limitStr := ctx.Param("limit")
+	limitStr := ctx.Query("limit")
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
@@ -18,19 +18,12 @@ func (api *API) Feeds(ctx *gin.Context) {
 		return
 	}
 
-	if limit == 0 || limit < 0 {
-		limit = 10
-	}
-
 	feeds, err := api.storage.Feeds.Feeds(limit)
 	if err != nil {
 		api.l.Error().Err(err).Msg("Failed to get news from storage")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get news from storage"})
 		return
 	}
-
-	ctx.Header("Content-Type", "application/json")
-	ctx.Header("Access-Control-Allow-Origin", "*")
 
 	ctx.JSON(http.StatusOK, feeds)
 }
