@@ -16,7 +16,7 @@ import (
 
 type mockFeedsRepository struct{}
 
-func (m *mockFeedsRepository) Feeds(limit int, title string) ([]models.Feeds, error) {
+func (m *mockFeedsRepository) Feeds(page int, pageSize int, title string, filter string) ([]models.Feeds, error) {
 	return []models.Feeds{
 		{Id: 1, Title: "Feed 1", Content: "Content 1"},
 		{Id: 2, Title: "Feed 2", Content: "Content 2"},
@@ -28,10 +28,6 @@ func (m *mockFeedsRepository) StoreFeeds([]models.Feeds) error {
 }
 
 func (m *mockFeedsRepository) FeedById(int) (*models.Feeds, error) {
-	return nil, nil
-}
-
-func (m *mockFeedsRepository) FeedsByFilter(int, string) ([]models.Feeds, error) {
 	return nil, nil
 }
 
@@ -49,7 +45,7 @@ func TestFeedsAPI(t *testing.T) {
 
 	limit := 5
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/feeds?"+"limit="+strconv.Itoa(limit)+"&"+"title=", nil)
+	req, _ := http.NewRequest("GET", "/feeds?"+"page="+strconv.Itoa(limit)+"&"+"title="+"&"+"filter=", nil)
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)

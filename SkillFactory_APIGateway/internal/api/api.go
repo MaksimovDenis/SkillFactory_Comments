@@ -56,6 +56,8 @@ func NewAPI(opts *Opts) (*API, error) {
 		swaggerFile: opts.SwaggerFile,
 	}
 
+	router.Use(requestIDMiddleware, loggingMiddleware)
+
 	router.Use(middleware.OapiRequestValidatorWithOptions(swagger, oapiOpts))
 
 	oapi.RegisterHandlersWithOptions(router, api, oapi.GinServerOptions{

@@ -52,7 +52,6 @@ func NewAPI(opts *Opts) *API {
 func (api *API) setupEndpoints() {
 	api.router.GET("api/feeds", api.Feeds)
 	api.router.GET("api/feeds/:id", api.FeedsById)
-	api.router.POST("api/feeds", api.FeedsByFilter)
 }
 
 func (api *API) Serve() error {

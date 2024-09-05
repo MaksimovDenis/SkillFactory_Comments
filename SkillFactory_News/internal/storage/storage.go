@@ -11,10 +11,9 @@ import (
 )
 
 type Feeds interface {
-	StoreFeeds(feeds []models.Feeds) error                                              //Save news to storage
-	Feeds(limit int, page int, title string) (feeds []models.Feeds, err error)          //Get news from storge
-	FeedById(id int) (*models.Feeds, error)                                             //Get news by Id from storge
-	FeedsByFilter(limit int, page int, filter string) (feeds []models.Feeds, err error) //Get news by filter and limit from storge
+	StoreFeeds(feeds []models.Feeds) error                                                       //Save news to storage
+	Feeds(page int, pageSize int, title string, filter string) (feeds []models.Feeds, err error) //Get news from storge
+	FeedById(id int) (*models.Feeds, error)                                                      //Get news by Id from storge
 }
 
 type Storage struct {

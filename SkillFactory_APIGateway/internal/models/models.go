@@ -8,11 +8,6 @@ type Feeds struct {
 	PubDate string `json:"pub_date" db:"pub_date"`
 }
 
-type Filter struct {
-	Limit  int    `json:"limit" db:"limit"`
-	Filter string `json:"filter" db:"filter"`
-}
-
 type Comments struct {
 	ID              int32   `json:"ID"`
 	NewsID          int32   `json:"NewsID"`

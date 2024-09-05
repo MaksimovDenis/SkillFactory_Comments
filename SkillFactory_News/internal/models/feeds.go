@@ -7,8 +7,3 @@ type Feeds struct {
 	Link    string `json:"link" db:"link"`
 	PubDate string `json:"pub_date" db:"pub_date"`
 }
-
-type Filter struct {
-	Limit  int    `json:"limit" db:"limit"`
-	Filter string `json:"filter" db:"filter"`
-}

@@ -4,14 +4,17 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/MaksimovDenis/SkillFactory_News/internal/models"
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	pageSize int = 15
+)
+
 func (api *API) Feeds(ctx *gin.Context) {
-	limitStr := ctx.Query("limit")
-	titleQuery := ctx.Query("title")
 	pageQuery := ctx.Query("page")
+	titleQuery := ctx.Query("title")
+	filterQuery := ctx.Query("filter")
 
 	page, err := strconv.Atoi(pageQuery)
 	if err != nil {
@@ -20,14 +23,7 @@ func (api *API) Feeds(ctx *gin.Context) {
 		return
 	}
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil {
-		api.l.Error().Err(err).Msg("Failed to get news from storage")
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid limit parameter"})
-		return
-	}
-
-	feeds, err := api.storage.Feeds.Feeds(limit, titleQuery)
+	feeds, err := api.storage.Feeds.Feeds(page, pageSize, titleQuery, filterQuery)
 	if err != nil {
 		api.l.Error().Err(err).Msg("Failed to get news from storage")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get news from storage"})
@@ -55,31 +51,4 @@ func (api *API) FeedsById(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, feed)
-}
-
-func (api *API) FeedsByFilter(ctx *gin.Context) {
-	var filters models.Filter
-
-	if err := ctx.BindJSON(&filters); err != nil {
-		api.l.Error().Err(err).Msg("failed to unmarshal feeds body")
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse feeds object body"})
-
-		return
-	}
-
-	if filters.Limit == 0 || filters.Limit < 0 {
-		filters.Limit = 10
-	}
-
-	feeds, err := api.storage.Feeds.FeedsByFilter(filters.Limit, filters.Filter)
-	if err != nil {
-		api.l.Error().Err(err).Msg("Failed to get feeds from storage")
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get feeds from storage"})
-		return
-	}
-
-	ctx.Header("Content-Type", "application/json")
-	ctx.Header("Access-Control-Allow-Origin", "*")
-
-	ctx.JSON(http.StatusOK, feeds)
 }

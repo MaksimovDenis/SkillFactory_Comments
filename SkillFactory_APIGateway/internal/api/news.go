@@ -2,8 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"skillfactory/SkillFactory_finalProject/APIGateway/internal/api/oapi"
 	"strconv"
 
@@ -11,19 +13,32 @@ import (
 )
 
 const (
-	feedsServiceURL = "http://localhost:8883"
+	feedsServiceURL = "http://localhost:8883/api/feeds"
 )
 
 func (api *API) Feeds(ctx *gin.Context, params oapi.FeedsParams) {
-	if *params.Limit <= 0 {
-		*params.Limit = 10
+	parsedURL, err := url.Parse(feedsServiceURL)
+	if err != nil {
+		api.l.Error().Err(err).Msg("Failed to parse url address feeds service")
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse url address feeds service"})
+		return
 	}
 
-	limitStr := strconv.FormatInt(int64(*params.Limit), 10)
+	if *params.Page <= 0 {
+		*params.Page = 1
+	}
 
-	rout := "/api/feeds/" + limitStr + *params.Title
+	paramsQuery := url.Values{}
+	paramsQuery.Add("page", strconv.FormatInt(int64(*params.Page), 10))
+	paramsQuery.Add("title", *params.Title)
+	paramsQuery.Add("filter", *params.Filter)
 
-	resp, err := http.Get(feedsServiceURL + rout)
+	parsedURL.RawQuery = paramsQuery.Encode()
+
+	reqURL := parsedURL.String()
+
+	fmt.Println(reqURL)
+	resp, err := http.Get(reqURL)
 	if err != nil {
 		api.l.Error().Err(err).Msg("Failed to get feeds from feeds service")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get feeds from feeds service"})
@@ -60,9 +75,7 @@ func (api *API) FeedsById(ctx *gin.Context, id oapi.ID) {
 
 	idStr := strconv.FormatInt(int64(id), 10)
 
-	rout := "/api/feeds/" + idStr
-
-	resp, err := http.Get(feedsServiceURL + rout)
+	resp, err := http.Get(feedsServiceURL + "/" + idStr)
 	if err != nil {
 		api.l.Error().Err(err).Msg("Failed to get feeds by id from feeds service")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get feeds by id from feeds service"})
@@ -97,37 +110,6 @@ func (api *API) FeedsById(ctx *gin.Context, id oapi.ID) {
 	list[0] = feed
 
 	res.JSON200 = &list
-
-	if res.JSON200 != nil {
-		ctx.JSON(http.StatusOK, res.JSON200)
-	} else {
-		ctx.JSON(http.StatusOK, gin.H{"message": "No feeds found"})
-	}
-}
-
-func (api *API) FeedsByFilter(ctx *gin.Context) {
-	rout := "/api/feeds"
-
-	resp, err := http.Post(feedsServiceURL+rout, "application/json", ctx.Request.Body)
-	if err != nil {
-		api.l.Error().Err(err).Msg("Failed to get feeds by filter from feeds service")
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get feeds by filter from feeds service"})
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		api.l.Error().Msgf("Unexpected status code: %d", resp.StatusCode)
-		ctx.JSON(resp.StatusCode, gin.H{"error": "FFailed to get feeds by filter from feeds service"})
-		return
-	}
-
-	res, err := oapi.ParseFeedsByIdResponse(resp)
-	if err != nil {
-		api.l.Error().Err(err).Msg("Failed to read response body")
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response body"})
-		return
-	}
 
 	if res.JSON200 != nil {
 		ctx.JSON(http.StatusOK, res.JSON200)

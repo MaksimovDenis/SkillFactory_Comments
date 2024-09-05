@@ -16,35 +16,15 @@ tags:
 paths:
   /feeds:
 
-    post:
-      description: Feeds by filter.
-      operationId: feedsByFilter
-      tags:
-        - feeds
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FeedsByFilter'
-      responses:
-        '200':
-          description: A filtred feeds
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Feeds'
-
     get:
       description: Get all feeds.
       operationId: feeds
       tags:
         - feeds
       parameters:
-        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Title"
+        - $ref: "#/components/parameters/Filter"
       responses:
         '200':
           description: List of feeds.
@@ -180,19 +160,6 @@ components:
         - link
         - pub_date
 
-    FeedsByFilter:
-      type: object
-      properties:
-        limit:
-          type: integer
-          description: Length of feeds list
-        filter:
-          type: string
-          description: Filter contains string that will find all comments which title or content include this string
-      required:
-        - limit
-        - filter
-
   parameters:
     ID:
       name: id
@@ -203,20 +170,30 @@ components:
         type: integer
         format: int64
 
-    Limit:
-      name: limit
+    Page:
+      name: page
       in: query
-      description: maximum number of results to return
+      description: the number of current page
       required: false
       schema:
         type: integer
         format: int64
-        default: 10
+        default: 1
 
     Title:
       name: title
       in: query
       description: title of news
+      required: false
+      schema:
+        type: string
+        format: string
+        default: ""
+
+    Filter:
+      name: filter
+      in: query
+      description: filter of content news
       required: false
       schema:
         type: string

@@ -12,10 +12,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const (
-	pageSize int = 15
-)
-
 type FeedsPostgres struct {
 	db *pgxpool.Pool
 	l  zerolog.Logger
@@ -28,7 +24,7 @@ func NewFeedsPostgres(db *pgxpool.Pool, log zerolog.Logger) *FeedsPostgres {
 	}
 }
 
-func (f *FeedsPostgres) Feeds(limit int, page int, title string) (feeds []models.Feeds, err error) {
+func (f *FeedsPostgres) Feeds(page int, pageSize int, title string, filter string) (feeds []models.Feeds, err error) {
 	offset := (page - 1) * int(pageSize)
 
 	rows, err := f.db.Query(context.Background(), `
@@ -39,10 +35,10 @@ func (f *FeedsPostgres) Feeds(limit int, page int, title string) (feeds []models
 			pub_date,
 			link
 		FROM feeds
-		WHERE title ILIKE '%' || $1 || '%' 
+		WHERE (title ILIKE '%' || $1 || '%') AND (content ILIKE '%' || $2 || '%')
 		ORDER BY pub_date DESC
-		LIMIT $2 OFFSET $3;
-	`, title, limit, offset)
+		LIMIT $3 OFFSET $4;
+	`, title, filter, pageSize, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -90,49 +86,6 @@ func (f *FeedsPostgres) FeedById(id int) (*models.Feeds, error) {
 	}
 
 	return &feed, nil
-}
-
-func (f *FeedsPostgres) FeedsByFilter(limit int, page int, filter string) (feeds []models.Feeds, err error) {
-	offset := (page - 1) * int(pageSize)
-
-	rows, err := f.db.Query(context.Background(), `
-		SELECT 
-			id, 
-			title,
-			content,
-			pub_date,
-			link
-		FROM feeds
-		WHERE title ILIKE '%' || $1 || '%' OR content ILIKE '%' || $1 || '%'
-		ORDER BY pub_date DESC
-		LIMIT $2 OFFSET $3;
-	`, filter, limit, offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var f models.Feeds
-		err = rows.Scan(
-			&f.Id,
-			&f.Title,
-			&f.Content,
-			&f.PubDate,
-			&f.Link,
-		)
-		if err != nil {
-			log.Error().Err(err).Msg("failed to get feeds from storage")
-			return nil, err
-		}
-
-		feeds = append(feeds, f)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	return feeds, nil
 }
 
 func (f *FeedsPostgres) StoreFeeds(feeds []models.Feeds) error {
