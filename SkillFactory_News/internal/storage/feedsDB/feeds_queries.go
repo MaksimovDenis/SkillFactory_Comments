@@ -12,6 +12,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	pageSize int = 15
+)
+
 type FeedsPostgres struct {
 	db *pgxpool.Pool
 	l  zerolog.Logger
@@ -24,7 +28,9 @@ func NewFeedsPostgres(db *pgxpool.Pool, log zerolog.Logger) *FeedsPostgres {
 	}
 }
 
-func (f *FeedsPostgres) Feeds(limit int) (feeds []models.Feeds, err error) {
+func (f *FeedsPostgres) Feeds(limit int, page int, title string) (feeds []models.Feeds, err error) {
+	offset := (page - 1) * int(pageSize)
+
 	rows, err := f.db.Query(context.Background(), `
 		SELECT 
 			id, 
@@ -33,9 +39,10 @@ func (f *FeedsPostgres) Feeds(limit int) (feeds []models.Feeds, err error) {
 			pub_date,
 			link
 		FROM feeds
+		WHERE title ILIKE '%' || $1 || '%' 
 		ORDER BY pub_date DESC
-		LIMIT $1;
-	`, limit)
+		LIMIT $2 OFFSET $3;
+	`, title, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +92,9 @@ func (f *FeedsPostgres) FeedById(id int) (*models.Feeds, error) {
 	return &feed, nil
 }
 
-func (f *FeedsPostgres) FeedsByFilter(limit int, filter string) (feeds []models.Feeds, err error) {
+func (f *FeedsPostgres) FeedsByFilter(limit int, page int, filter string) (feeds []models.Feeds, err error) {
+	offset := (page - 1) * int(pageSize)
+
 	rows, err := f.db.Query(context.Background(), `
 		SELECT 
 			id, 
@@ -94,10 +103,10 @@ func (f *FeedsPostgres) FeedsByFilter(limit int, filter string) (feeds []models.
 			pub_date,
 			link
 		FROM feeds
-		WHERE title ILIKE '%' || $2 || '%' OR content ILIKE '%' || $2 || '%'
+		WHERE title ILIKE '%' || $1 || '%' OR content ILIKE '%' || $1 || '%'
 		ORDER BY pub_date DESC
-		LIMIT $1;
-	`, limit, filter)
+		LIMIT $2 OFFSET $3;
+	`, filter, limit, offset)
 	if err != nil {
 		return nil, err
 	}

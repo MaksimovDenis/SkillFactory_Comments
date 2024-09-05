@@ -44,6 +44,7 @@ paths:
         - feeds
       parameters:
         - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Title"
       responses:
         '200':
           description: List of feeds.
@@ -211,3 +212,13 @@ components:
         type: integer
         format: int64
         default: 10
+
+    Title:
+      name: title
+      in: query
+      description: title of news
+      required: false
+      schema:
+        type: string
+        format: string
+        default: ""

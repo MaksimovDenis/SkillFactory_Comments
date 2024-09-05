@@ -10,6 +10,15 @@ import (
 
 func (api *API) Feeds(ctx *gin.Context) {
 	limitStr := ctx.Query("limit")
+	titleQuery := ctx.Query("title")
+	pageQuery := ctx.Query("page")
+
+	page, err := strconv.Atoi(pageQuery)
+	if err != nil {
+		api.l.Error().Err(err).Msg("Failed to get news from storage")
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid page parameter"})
+		return
+	}
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
@@ -18,7 +27,7 @@ func (api *API) Feeds(ctx *gin.Context) {
 		return
 	}
 
-	feeds, err := api.storage.Feeds.Feeds(limit)
+	feeds, err := api.storage.Feeds.Feeds(limit, titleQuery)
 	if err != nil {
 		api.l.Error().Err(err).Msg("Failed to get news from storage")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get news from storage"})

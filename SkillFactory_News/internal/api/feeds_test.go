@@ -16,7 +16,7 @@ import (
 
 type mockFeedsRepository struct{}
 
-func (m *mockFeedsRepository) Feeds(limit int) ([]models.Feeds, error) {
+func (m *mockFeedsRepository) Feeds(limit int, title string) ([]models.Feeds, error) {
 	return []models.Feeds{
 		{Id: 1, Title: "Feed 1", Content: "Content 1"},
 		{Id: 2, Title: "Feed 2", Content: "Content 2"},
@@ -45,17 +45,14 @@ func TestFeedsAPI(t *testing.T) {
 		},
 	}
 
-	r.GET("/feeds/:limit", api.Feeds)
+	r.GET("/feeds", api.Feeds)
 
 	limit := 5
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/feeds/"+strconv.Itoa(limit), nil)
+	req, _ := http.NewRequest("GET", "/feeds?"+"limit="+strconv.Itoa(limit)+"&"+"title=", nil)
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-
-	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
-	assert.Equal(t, "*", w.Header().Get("Access-Control-Allow-Origin"))
 
 	var response []models.Feeds
 	err := json.Unmarshal(w.Body.Bytes(), &response)

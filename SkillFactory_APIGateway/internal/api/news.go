@@ -21,7 +21,7 @@ func (api *API) Feeds(ctx *gin.Context, params oapi.FeedsParams) {
 
 	limitStr := strconv.FormatInt(int64(*params.Limit), 10)
 
-	rout := "/api/feeds/" + limitStr
+	rout := "/api/feeds/" + limitStr + *params.Title
 
 	resp, err := http.Get(feedsServiceURL + rout)
 	if err != nil {
