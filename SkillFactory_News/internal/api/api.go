@@ -42,6 +42,8 @@ func NewAPI(opts *Opts) *API {
 		storage: opts.Storage,
 	}
 
+	router.Use(requestIDMiddleware, loggingMiddleware)
+
 	go api.StartParseUrl()
 
 	api.setupEndpoints()

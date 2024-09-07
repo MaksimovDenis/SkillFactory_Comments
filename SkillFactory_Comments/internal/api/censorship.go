@@ -34,7 +34,6 @@ func (api *API) StartCensorship() {
 }
 
 func (api *API) handleResults(chResult <-chan CensorResult) {
-	fmt.Println("handleResults started")
 	for result := range chResult {
 		var censorResult [][]string
 		err := json.Unmarshal(result.Data, &censorResult)
@@ -56,7 +55,6 @@ func (api *API) handleResults(chResult <-chan CensorResult) {
 }
 
 func (api *API) handleErrors(chErrors <-chan error) {
-	fmt.Println("handleErrors started")
 	for err := range chErrors {
 		api.l.Debug().Err(err).Msg("Error processing request")
 	}
@@ -126,14 +124,12 @@ func (api *API) aiRequest(data []byte) ([]byte, error) {
 }
 
 func (api *API) parseURL(result chan<- CensorResult, errs chan<- error) {
-	fmt.Println("ParseURL started!!!")
 	ticker := time.NewTicker(time.Second * time.Duration(period))
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
-			fmt.Println("tick!!!")
 			data, idsData, err := api.getDataFromStorage()
 			if err != nil {
 				errs <- err

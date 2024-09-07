@@ -25,6 +25,7 @@ paths:
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Title"
         - $ref: "#/components/parameters/Filter"
+        - $ref: "#/components/parameters/RequestId"
       responses:
         '200':
           description: List of feeds.
@@ -44,6 +45,7 @@ paths:
         - feeds
       parameters:
         - $ref: "#/components/parameters/ID"
+        - $ref: "#/components/parameters/RequestId"
       responses:
         '200':
           description: Feeds by id.
@@ -52,7 +54,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Feeds'
+                  $ref: '#/components/schemas/FeedsById'
 
   /comments:
 
@@ -160,6 +162,19 @@ components:
         - link
         - pub_date
 
+    FeedsById:
+      type: object
+      properties:
+        feeds:
+          $ref: '#/components/schemas/Feeds'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+      required:
+        - feeds
+        - comments
+
   parameters:
     ID:
       name: id
@@ -194,6 +209,16 @@ components:
       name: filter
       in: query
       description: filter of content news
+      required: false
+      schema:
+        type: string
+        format: string
+        default: ""
+
+    RequestId:
+      name: request_id
+      in: query
+      description: request_id 
       required: false
       schema:
         type: string

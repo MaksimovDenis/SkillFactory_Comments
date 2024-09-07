@@ -4,14 +4,16 @@ import (
 	"context"
 	"time"
 
-	"github.com/rs/zerolog/log"
-
 	"math/rand"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
-const requestIDKey = "request_id"
+const (
+	requestIDKey = "request_id"
+	charset      = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+)
 
 func requestIDMiddleware(c *gin.Context) {
 	requestID := c.Query("request_id")
@@ -41,7 +43,6 @@ func loggingMiddleware(c *gin.Context) {
 }
 
 func generateRandomID(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, length)
 	for i := range b {

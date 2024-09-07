@@ -15,3 +15,8 @@ type Comments struct {
 	Content         string  `json:"Content"`
 	CreatedAt       *string `json:"CreatedAt"`
 }
+
+type FeedsById struct {
+	Feeds    Feeds      `json:"feeds"`
+	Comments []Comments `json:"comments"`
+}

@@ -66,6 +66,12 @@ type Feeds struct {
 	Title string `json:"title"`
 }
 
+// FeedsById defines model for FeedsById.
+type FeedsById struct {
+	Comments []Comment `json:"comments"`
+	Feeds    Feeds     `json:"feeds"`
+}
+
 // Filter defines model for Filter.
 type Filter = string
 
@@ -74,6 +80,9 @@ type ID = int64
 
 // Page defines model for Page.
 type Page = int64
+
+// RequestId defines model for RequestId.
+type RequestId = string
 
 // Title defines model for Title.
 type Title = string
@@ -88,6 +97,15 @@ type FeedsParams struct {
 
 	// Filter filter of content news
 	Filter *Filter `form:"filter,omitempty" json:"filter,omitempty"`
+
+	// RequestId request_id
+	RequestId *RequestId `form:"request_id,omitempty" json:"request_id,omitempty"`
+}
+
+// FeedsByIdParams defines parameters for FeedsById.
+type FeedsByIdParams struct {
+	// RequestId request_id
+	RequestId *RequestId `form:"request_id,omitempty" json:"request_id,omitempty"`
 }
 
 // CreateCommentJSONRequestBody defines body for CreateComment for application/json ContentType.
@@ -178,7 +196,7 @@ type ClientInterface interface {
 	Feeds(ctx context.Context, params *FeedsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// FeedsById request
-	FeedsById(ctx context.Context, id ID, reqEditors ...RequestEditorFn) (*http.Response, error)
+	FeedsById(ctx context.Context, id ID, params *FeedsByIdParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetSwagger request
 	GetSwagger(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -232,8 +250,8 @@ func (c *Client) Feeds(ctx context.Context, params *FeedsParams, reqEditors ...R
 	return c.Client.Do(req)
 }
 
-func (c *Client) FeedsById(ctx context.Context, id ID, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewFeedsByIdRequest(c.Server, id)
+func (c *Client) FeedsById(ctx context.Context, id ID, params *FeedsByIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewFeedsByIdRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -393,6 +411,22 @@ func NewFeedsRequest(server string, params *FeedsParams) (*http.Request, error) 
 
 		}
 
+		if params.RequestId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "request_id", runtime.ParamLocationQuery, *params.RequestId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -405,7 +439,7 @@ func NewFeedsRequest(server string, params *FeedsParams) (*http.Request, error) 
 }
 
 // NewFeedsByIdRequest generates requests for FeedsById
-func NewFeedsByIdRequest(server string, id ID) (*http.Request, error) {
+func NewFeedsByIdRequest(server string, id ID, params *FeedsByIdParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -428,6 +462,28 @@ func NewFeedsByIdRequest(server string, id ID) (*http.Request, error) {
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.RequestId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "request_id", runtime.ParamLocationQuery, *params.RequestId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -520,7 +576,7 @@ type ClientWithResponsesInterface interface {
 	FeedsWithResponse(ctx context.Context, params *FeedsParams, reqEditors ...RequestEditorFn) (*FeedsResponse, error)
 
 	// FeedsByIdWithResponse request
-	FeedsByIdWithResponse(ctx context.Context, id ID, reqEditors ...RequestEditorFn) (*FeedsByIdResponse, error)
+	FeedsByIdWithResponse(ctx context.Context, id ID, params *FeedsByIdParams, reqEditors ...RequestEditorFn) (*FeedsByIdResponse, error)
 
 	// GetSwaggerWithResponse request
 	GetSwaggerWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerResponse, error)
@@ -594,7 +650,7 @@ func (r FeedsResponse) StatusCode() int {
 type FeedsByIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]Feeds
+	JSON200      *[]FeedsById
 }
 
 // Status returns HTTPResponse.Status
@@ -670,8 +726,8 @@ func (c *ClientWithResponses) FeedsWithResponse(ctx context.Context, params *Fee
 }
 
 // FeedsByIdWithResponse request returning *FeedsByIdResponse
-func (c *ClientWithResponses) FeedsByIdWithResponse(ctx context.Context, id ID, reqEditors ...RequestEditorFn) (*FeedsByIdResponse, error) {
-	rsp, err := c.FeedsById(ctx, id, reqEditors...)
+func (c *ClientWithResponses) FeedsByIdWithResponse(ctx context.Context, id ID, params *FeedsByIdParams, reqEditors ...RequestEditorFn) (*FeedsByIdResponse, error) {
+	rsp, err := c.FeedsById(ctx, id, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -770,7 +826,7 @@ func ParseFeedsByIdResponse(rsp *http.Response) (*FeedsByIdResponse, error) {
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []Feeds
+		var dest []FeedsById
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -810,7 +866,7 @@ type ServerInterface interface {
 	Feeds(c *gin.Context, params FeedsParams)
 
 	// (GET /feeds/{id})
-	FeedsById(c *gin.Context, id ID)
+	FeedsById(c *gin.Context, id ID, params FeedsByIdParams)
 
 	// (GET /swagger)
 	GetSwagger(c *gin.Context)
@@ -883,6 +939,14 @@ func (siw *ServerInterfaceWrapper) Feeds(c *gin.Context) {
 		return
 	}
 
+	// ------------- Optional query parameter "request_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "request_id", c.Request.URL.Query(), &params.RequestId)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter request_id: %w", err), http.StatusBadRequest)
+		return
+	}
+
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 		if c.IsAborted() {
@@ -907,6 +971,17 @@ func (siw *ServerInterfaceWrapper) FeedsById(c *gin.Context) {
 		return
 	}
 
+	// Parameter object where we will unmarshal all parameters from the context
+	var params FeedsByIdParams
+
+	// ------------- Optional query parameter "request_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "request_id", c.Request.URL.Query(), &params.RequestId)
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter request_id: %w", err), http.StatusBadRequest)
+		return
+	}
+
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 		if c.IsAborted() {
@@ -914,7 +989,7 @@ func (siw *ServerInterfaceWrapper) FeedsById(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.FeedsById(c, id)
+	siw.Handler.FeedsById(c, id, params)
 }
 
 // GetSwagger operation middleware
@@ -967,21 +1042,22 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8xXya7bNhT9FeK2ixZQLadpu9AueYYDAykaoNkFhkFLVzZjimRI6gWCoX8vOGhwJQ9p",
-	"0eLtLPKO5x4e0mfIZaWkQGENZGdQVNMKLWr/tWbcona/CjS5ZsoyKSCD0q8TWZJcCovCEoFfDSTA3O6X",
-	"GnUDCQhaYW8MCZj8iBUN0UpacwsZQAKl1BV1v43VTBwgAdsoHL7bNoHNaloEK1wBcv8Zc9ulVtQeh8ys",
-	"gAQ0fqmZxgIyq2scV9EnZsL+9suQlwmLB9Q+8Qd6wGlqe0Qi6mofMai1dhgoZzuPQdyaQeBV8lAdH5nl",
-	"c4W4ZVfDDfy9zb+Bv+18PSeeZFWhsJ4sWirUlqHfiFSYFvkUOSJL4oDLY4BJosQNbOK9WV117AFKwPW/",
-	"u+1OjZE5oxYLjxZhFqvZWIq6ce5iujtRg3FXG/mBlYSK5sf5KQ5c/BTI2ZWd9Ohte8fI7DaBJ43U4n8J",
-	"/AuET9Sc070jfTi3d+B8DMk1YmH+OYKld3+QuD4X2axmQeJMnKYu75k43c2l6v2uoHZGDT7Ue85y6r6I",
-	"t5jxtvNC8rETEp92hsYjMZ6wuFOYDsbY3qjU6SxcICZK2cFPcw9/rTlkcLRWmSxNzYlxXtLcSt0sdJ26",
-	"Bi7rfvfHT69/Jb/Tk2GVfCYrFMz0FWUwDrArmaB8p7SMN8YzahOiLBfLxSsXXCoUVDHI4PViuVi6Fqg9",
-	"eo6kkaP+44AzZHmHllDOOzKbBfiA2g9kUwSLN5w/dYEclEZJYQILf14u/0ZGqlQ30PSzcUnOIxl3J9A7",
-	"fq+xhAy+S4e7PI2KnXaq0fYToFrTJgzgsv43hDNjw60eK3RGlh6MG3W/uHUklGbuuHih6tyn/V8KWWAS",
-	"GvtWFs03dX6z4Ysc7SVhnZS087BfdiJP13pvE0jLTkZu8sBbTUFYx4M9fmp9mu9pMEn9Q6RN7tqFh8ID",
-	"hvFt127/DxaGnh/g4PvIwIjdeAYB9NEA0jMr2ptTCGK2bwgrrszhbbMpvnkWm9VLg209bvQaaOYrPRzC",
-	"c34WsT/DPimZV/OJdMV9eOT85MPFacZhx7UpLffoanMPTNTPHfrhDkidDjuYo/m5/z8RQekXBrXatn8F",
-	"AAD///3t4qTQDAAA",
+	"H4sIAAAAAAAC/8xXTY/bNhD9K8K0hxZQLadpe9AtWWMDAykatLkFC4OWRjZjieSS1AaCof9eDEVK8kr+",
+	"SBcNcpPEGc7Me2+G1BEyWSkpUFgD6REU06xCi9q93fPSoqanHE2mubJcCkihcN8jWUSZFBaFjQR+MRAD",
+	"p9XHGnUDMQhWYW8MMZhsjxXrditYXVpIAWIopK4YPRurudhBDLZROLy3bQzr1TQJnlMCcvsZMxtCK2b3",
+	"Q2SeQwwaH2uuMYfU6hrHWfSBubB//DbE5cLiDrUL/IHtcBra7jESdbX1GNRaEwaKbOcx8EszCLyKb8rj",
+	"b3ys0dh1Pk1Gd0sbV+1c8BODF5DwkdtyDgz6TDhc0ICzeUn0Nvg6Xd7JqkJhnWC1VKgtR7fg5ThN8s7r",
+	"VBYRkZf5DSaBYhLNxHu9OuvYkxQD1b+57M6MkRlnFnOHVsQtVrN7KUaS2vhwV3btjENu0U+8iJhofp5X",
+	"0tAPn7oGCWnHPXoPvaPvrjaGO43M4v8J/HcIn6jLkm1J9N3suALnbUjeI+bmvyNYOPcbhetiRevVLEgl",
+	"F4epy3suDldjqXq7yZmdmQYf6m3JM0ZvkbOY8bbzg+RjGCQu7IyMR7NoouIwYQKMvrxRqme5eNt0Y/U5",
+	"H04O7pl05h5+1FhACj8kw6mZ+LmUhN5o+zhMa9bQexEov+Tf6eJ5cYGCPp1pGeTCRSGDiljmVFTrElLY",
+	"W6tMmiTmwMuyYJmVulnoOqG0TuF/99cvr3+P/mQHwyv5FK1QcNMDm8J4g03BBSs3Skt/+D6hNt0uy8Vy",
+	"8Yo2lwoFUxxSeL1YLpbEBLN7h0IyxnaHM5p/hzZiZRl60izAbaidrogtsnhTlndhIwLNKClMR96vy+Wz",
+	"nmJKBV0mnw0FOY5Oo5cR3E6wfBOV3NjuguQzJCPLdoZIHcikXpJmruvdvA3u0/pP53EcDvm3Mm++qvKL",
+	"BZ/EaE+lSROxnYf9tBJ5OFd7G0PSt8ZFHTirKQj3vjnGt9ZP8zUNJom707XxVbvuvnODob8m32A5XOPa",
+	"h28hWT9Trgv2vZerB3pMWMfQiK3kyPP2ImXdAN82Ec/PkOZm7tcSt159txi7em7A+X6MzDmUzRe223X/",
+	"XbMQ/9OtRwV3R95kMPp1uKU7s+F2YcbbjnNTWm6RcqNbOOqnQFd3wiQ05Qlqb37sf/y8+PoPwyx8aP8N",
+	"AAD//y+y+op5DgAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

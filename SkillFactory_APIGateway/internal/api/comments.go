@@ -11,13 +11,11 @@ import (
 )
 
 const (
-	commentsServiceURL = "http://localhost:8882"
+	commentsServiceURL = "http://localhost:8882/api/comments"
 )
 
 func (api *API) CreateComment(ctx *gin.Context) {
-	rout := "/api/comments"
-
-	resp, err := http.Post(commentsServiceURL+rout, "application/json", ctx.Request.Body)
+	resp, err := http.Post(commentsServiceURL, "application/json", ctx.Request.Body)
 	if err != nil {
 		api.l.Error().Err(err).Msg("Failed to get comments from comments service")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get comments from comments service"})
@@ -49,10 +47,7 @@ func (api *API) CreateComment(ctx *gin.Context) {
 }
 
 func (api *API) GetAllComments(ctx *gin.Context) {
-
-	rout := "/api/comments"
-
-	resp, err := http.Get(commentsServiceURL + rout)
+	resp, err := http.Get(commentsServiceURL)
 	if err != nil {
 		api.l.Error().Err(err).Msg("Failed to get comments from comments service")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get comments from comments service"})

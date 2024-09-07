@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"skillfactory/SkillFactory_finalProject/APIGateway/internal/api/oapi"
+	"sync"
 	"time"
 
 	middleware "github.com/deepmap/oapi-codegen/pkg/gin-middleware"
@@ -20,6 +21,8 @@ const (
 type Opts struct {
 	Addr        string
 	Log         zerolog.Logger
+	WG          *sync.WaitGroup
+	RequestChan chan []byte
 	SwaggerFile []byte
 }
 
@@ -28,6 +31,8 @@ type API struct {
 	server      *http.Server
 	router      *gin.Engine
 	swaggerFile []byte
+	wg          *sync.WaitGroup
+	requestChan chan []byte
 }
 
 func NewAPI(opts *Opts) (*API, error) {
@@ -54,6 +59,8 @@ func NewAPI(opts *Opts) (*API, error) {
 		},
 		router:      router,
 		swaggerFile: opts.SwaggerFile,
+		wg:          opts.WG,
+		requestChan: opts.RequestChan,
 	}
 
 	router.Use(requestIDMiddleware, loggingMiddleware)
