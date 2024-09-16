@@ -222,6 +222,7 @@ func (api *API) prepareRequestCommentById(ctx *gin.Context, id string, params oa
 	}
 
 	var comments []oapi.Comment
+
 	if err := json.Unmarshal(body, &comments); err != nil {
 		api.l.Error().Err(err).Msg("Failed to unmarshal comments response")
 		errorChan <- err

@@ -7,16 +7,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/MaksimovDenis/SkillFactory_News/config"
-	"github.com/MaksimovDenis/SkillFactory_News/internal/api"
-	"github.com/MaksimovDenis/SkillFactory_News/internal/storage"
-
+	"github.com/MaksimovDenis/Skillfactory_Censorship/config"
+	api "github.com/MaksimovDenis/Skillfactory_Censorship/internal"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 func main() {
-
 	cfg, err := config.InitConfig()
 	if err != nil {
 		log.Panic().Err(err).Msg("failed to init config")
@@ -29,24 +26,9 @@ func main() {
 
 	logger := zerolog.New(os.Stdout).Level(logLevel).With().Timestamp().Logger()
 
-	ctx := context.Background()
-
-	dbLog := logger.With().Str("module", "storage").Logger()
-
-	db, err := storage.NewPostgres(ctx, cfg.PgConnString, dbLog)
-	if err != nil {
-		logger.Fatal().Err(err).Msg("failed to init database")
-	}
-
-	storage := storage.NewRepository(ctx, db, dbLog)
-
-	apiLog := logger.With().Str("module", "api").Logger()
-	fmt.Println(cfg.APIPort)
-
 	APIConfig := &api.Opts{
-		Addr:    fmt.Sprintf("localhost:%v", cfg.APIPort),
-		Log:     apiLog,
-		Storage: storage,
+		Addr: fmt.Sprintf("localhost:%v", cfg.APIPort),
+		Log:  logger,
 	}
 
 	server := api.NewAPI(APIConfig)
@@ -69,8 +51,6 @@ func main() {
 	log.Info().Str("signal", sig.String()).Msg("signal received")
 
 	server.Stop(context.Background())
-	storage.StopPG()
 
 	logger.Info().Msg("exiting")
-
 }

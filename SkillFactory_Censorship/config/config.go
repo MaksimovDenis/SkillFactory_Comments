@@ -7,9 +7,8 @@ import (
 )
 
 type Config struct {
-	APIPort      string `default:"8883"`
-	PgConnString string `default:"postgres://admin:admin@localhost:5433/feeds?sslmode=disable"`
-	LogLevel     string `default:"debug"`
+	APIPort  string `default:"8884"`
+	LogLevel string `default:"debug"`
 }
 
 func InitConfig() (*Config, error) {
@@ -20,8 +19,7 @@ func InitConfig() (*Config, error) {
 	}
 
 	cnf = Config{
-		APIPort:      os.Getenv("SERVER_PORT"),
-		PgConnString: os.Getenv("PG_DSN"),
+		APIPort: os.Getenv("SERVER_PORT"),
 	}
 
 	return &cnf, nil

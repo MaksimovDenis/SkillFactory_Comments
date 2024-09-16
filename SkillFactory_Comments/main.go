@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/MaksimovDenis/SkillFactory_Comments/config"
 	"github.com/MaksimovDenis/SkillFactory_Comments/internal/api"
-	"github.com/MaksimovDenis/SkillFactory_Comments/internal/config"
 	"github.com/MaksimovDenis/SkillFactory_Comments/internal/storage"
 
 	"github.com/rs/zerolog"

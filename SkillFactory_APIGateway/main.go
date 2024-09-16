@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"skillfactory/SkillFactory_finalProject/APIGateway/config"
 	"skillfactory/SkillFactory_finalProject/APIGateway/internal/api"
-	"skillfactory/SkillFactory_finalProject/APIGateway/internal/config"
 	"syscall"
 
 	"github.com/rs/zerolog"

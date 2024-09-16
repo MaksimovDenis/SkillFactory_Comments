@@ -9,3 +9,6 @@ sql:
         package: "queries"
         out: "internal/storage/queries"
         sql_package: "pgx/v5"
+        overrides:
+          - column: public.comments.created_at
+            go_type: "time.Time"

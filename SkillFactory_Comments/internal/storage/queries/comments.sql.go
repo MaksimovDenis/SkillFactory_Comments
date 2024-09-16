@@ -7,6 +7,7 @@ package queries
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -39,22 +40,67 @@ func (q *Queries) DeleteComment(ctx context.Context, id int32) error {
 }
 
 const getAllComments = `-- name: GetAllComments :many
-SELECT id, news_id, parent_comment_id, content, created_at 
+SELECT news_id, parent_comment_id, content, created_at 
 FROM comments
 ORDER BY id
 `
 
-func (q *Queries) GetAllComments(ctx context.Context) ([]Comment, error) {
+type GetAllCommentsRow struct {
+	NewsID          pgtype.Int4
+	ParentCommentID pgtype.Int4
+	Content         string
+	CreatedAt       time.Time
+}
+
+func (q *Queries) GetAllComments(ctx context.Context) ([]GetAllCommentsRow, error) {
 	rows, err := q.db.Query(ctx, getAllComments)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Comment
+	var items []GetAllCommentsRow
 	for rows.Next() {
-		var i Comment
+		var i GetAllCommentsRow
 		if err := rows.Scan(
-			&i.ID,
+			&i.NewsID,
+			&i.ParentCommentID,
+			&i.Content,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCommentById = `-- name: GetCommentById :many
+SELECT news_id, parent_comment_id, content, created_at 
+FROM comments
+WHERE news_id = $1 OR parent_comment_id = $1
+ORDER BY created_at
+`
+
+type GetCommentByIdRow struct {
+	NewsID          pgtype.Int4
+	ParentCommentID pgtype.Int4
+	Content         string
+	CreatedAt       time.Time
+}
+
+func (q *Queries) GetCommentById(ctx context.Context, newsID pgtype.Int4) ([]GetCommentByIdRow, error) {
+	rows, err := q.db.Query(ctx, getCommentById, newsID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCommentByIdRow
+	for rows.Next() {
+		var i GetCommentByIdRow
+		if err := rows.Scan(
 			&i.NewsID,
 			&i.ParentCommentID,
 			&i.Content,

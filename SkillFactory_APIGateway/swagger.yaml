@@ -106,19 +106,25 @@ components:
         id:
           type: integer
           description: ID of the comment
-        news_id:
+        NewsID:
           type: integer
           description: ID of the associated news item
-        parent_comment_id:
+          format: int32
+        ParentCommentID:
           type: integer
           description: ID of the parent comment (if any)
+          format: int32
         content:
+          type: string
+          description: Content of the comment
+        CreatedAt:
           type: string
           description: Content of the comment
       required:
         - id 
-        - news_id
+        - NewsID
         - content
+        - CreatedAt
 
     CreateComment:
       type: object

@@ -5,6 +5,8 @@
 package queries
 
 import (
+	"time"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -13,5 +15,5 @@ type Comment struct {
 	NewsID          pgtype.Int4
 	ParentCommentID pgtype.Int4
 	Content         string
-	CreatedAt       pgtype.Timestamp
+	CreatedAt       time.Time
 }

@@ -51,6 +51,8 @@ func NewAPI(opts *Opts) (*API, error) {
 
 	router.MaxMultipartMemory = FileUploadBufferSize
 
+	wg := &sync.WaitGroup{}
+
 	api := &API{
 		l: opts.Log,
 		server: &http.Server{
@@ -59,7 +61,7 @@ func NewAPI(opts *Opts) (*API, error) {
 		},
 		router:      router,
 		swaggerFile: opts.SwaggerFile,
-		wg:          opts.WG,
+		wg:          wg,
 		requestChan: opts.RequestChan,
 	}
 

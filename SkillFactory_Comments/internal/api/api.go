@@ -44,7 +44,7 @@ func NewAPI(opts *Opts) (*API, error) {
 		storage: opts.Storage,
 	}
 
-	go api.StartCensorship()
+	router.Use(requestIDMiddleware, loggingMiddleware)
 
 	api.setupEndpoints()
 
@@ -53,6 +53,7 @@ func NewAPI(opts *Opts) (*API, error) {
 
 func (api *API) setupEndpoints() {
 	api.router.GET("api/comments", api.GetAllComments)
+	api.router.GET("api/comments/:id", api.GetCommentById)
 	api.router.POST("api/comments", api.CreateComment)
 }
 
