@@ -1,10 +1,10 @@
 -- name: GetAllComments :many
-SELECT news_id, parent_comment_id, content, created_at 
+SELECT id, news_id, parent_comment_id, content, created_at 
 FROM comments
 ORDER BY id;
 
 -- name: GetCommentById :many
-SELECT news_id, parent_comment_id, content, created_at 
+SELECT id, news_id, parent_comment_id, content, created_at 
 FROM comments
 WHERE news_id = $1 OR parent_comment_id = $1
 ORDER BY created_at;

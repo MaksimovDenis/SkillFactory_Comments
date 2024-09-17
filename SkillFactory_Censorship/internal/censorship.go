@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	deepPavlovModelURL = "http://0.0.0.0:5555/model"
+	deepPavlovModelURL = "http://deep-pavlov:5000/model"
 )
 
 type Censor struct {

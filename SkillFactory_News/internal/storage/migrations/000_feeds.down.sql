@@ -1,1 +1,1 @@
-DROP TABLE feeds;
+DROP DATABASE feeds;

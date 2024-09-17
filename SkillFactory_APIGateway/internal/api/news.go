@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -13,7 +12,7 @@ import (
 )
 
 const (
-	feedsServiceURL = "http://localhost:8883/api/feeds"
+	feedsServiceURL = "http://news:8883/api/feeds"
 )
 
 func (api *API) Feeds(ctx *gin.Context, params oapi.FeedsParams) {
@@ -39,7 +38,6 @@ func (api *API) Feeds(ctx *gin.Context, params oapi.FeedsParams) {
 
 	reqURL := parsedURL.String()
 
-	fmt.Println(reqURL)
 	resp, err := http.Get(reqURL)
 	if err != nil {
 		api.l.Error().Err(err).Msg("Failed to get feeds from feeds service")

@@ -49,6 +49,7 @@ func (api *API) GetAllComments(ctx *gin.Context) {
 
 		for idx, val := range comments {
 			comment := queries.Comment{
+				ID:              val.ID,
 				NewsID:          val.NewsID,
 				ParentCommentID: val.ParentCommentID,
 				Content:         val.Content,
@@ -86,6 +87,7 @@ func (api *API) GetCommentById(ctx *gin.Context) {
 
 	for idx, value := range comments {
 		res[idx] = queries.Comment{
+			ID:              value.ID,
 			NewsID:          value.NewsID,
 			ParentCommentID: value.ParentCommentID,
 			Content:         value.Content,

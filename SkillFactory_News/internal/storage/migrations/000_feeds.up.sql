@@ -6,3 +6,4 @@ CREATE TABLE feeds (
     link TEXT NOT NULL UNIQUE
 );
 
+ALTER TABLE feeds OWNER TO admin;

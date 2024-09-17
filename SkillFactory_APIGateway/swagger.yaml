@@ -105,7 +105,7 @@ components:
       properties:
         id:
           type: integer
-          description: ID of the comment
+          description: ID of the comment (if any)
         NewsID:
           type: integer
           description: ID of the associated news item

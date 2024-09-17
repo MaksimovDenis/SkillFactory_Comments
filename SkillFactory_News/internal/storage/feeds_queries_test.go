@@ -25,7 +25,7 @@ import (
 )
 
 func TestNewPostgres(t *testing.T) {
-	conStr := "postgres://admin:admin@localhost:5432/newsAgregator?sslmode=disable"
+	conStr := "postgres://admin:admin@0.0.0.0:5432/newsAgregator?sslmode=disable"
 	var log zerolog.Logger
 	_, err := NewPostgres(context.Background(), conStr, log)
 	if err != nil {
@@ -83,7 +83,7 @@ func TestFeedsQueries_StoreFeeds(t *testing.T) {
 	time.Sleep(5 * time.Second)
 
 	// Connect to test db.
-	conStr := "postgres://admin:admin@localhost:5999/testDB?sslmode=disable"
+	conStr := "postgres://admin:admin@0.0.0.0:5999/testDB?sslmode=disable"
 	var log zerolog.Logger
 	db, err := NewPostgres(context.Background(), conStr, log)
 	if err != nil {

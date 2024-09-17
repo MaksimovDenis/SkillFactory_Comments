@@ -7,7 +7,6 @@ package queries
 
 import (
 	"context"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -40,28 +39,22 @@ func (q *Queries) DeleteComment(ctx context.Context, id int32) error {
 }
 
 const getAllComments = `-- name: GetAllComments :many
-SELECT news_id, parent_comment_id, content, created_at 
+SELECT id, news_id, parent_comment_id, content, created_at 
 FROM comments
 ORDER BY id
 `
 
-type GetAllCommentsRow struct {
-	NewsID          pgtype.Int4
-	ParentCommentID pgtype.Int4
-	Content         string
-	CreatedAt       time.Time
-}
-
-func (q *Queries) GetAllComments(ctx context.Context) ([]GetAllCommentsRow, error) {
+func (q *Queries) GetAllComments(ctx context.Context) ([]Comment, error) {
 	rows, err := q.db.Query(ctx, getAllComments)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetAllCommentsRow
+	var items []Comment
 	for rows.Next() {
-		var i GetAllCommentsRow
+		var i Comment
 		if err := rows.Scan(
+			&i.ID,
 			&i.NewsID,
 			&i.ParentCommentID,
 			&i.Content,
@@ -78,29 +71,23 @@ func (q *Queries) GetAllComments(ctx context.Context) ([]GetAllCommentsRow, erro
 }
 
 const getCommentById = `-- name: GetCommentById :many
-SELECT news_id, parent_comment_id, content, created_at 
+SELECT id, news_id, parent_comment_id, content, created_at 
 FROM comments
 WHERE news_id = $1 OR parent_comment_id = $1
 ORDER BY created_at
 `
 
-type GetCommentByIdRow struct {
-	NewsID          pgtype.Int4
-	ParentCommentID pgtype.Int4
-	Content         string
-	CreatedAt       time.Time
-}
-
-func (q *Queries) GetCommentById(ctx context.Context, newsID pgtype.Int4) ([]GetCommentByIdRow, error) {
+func (q *Queries) GetCommentById(ctx context.Context, newsID pgtype.Int4) ([]Comment, error) {
 	rows, err := q.db.Query(ctx, getCommentById, newsID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetCommentByIdRow
+	var items []Comment
 	for rows.Next() {
-		var i GetCommentByIdRow
+		var i Comment
 		if err := rows.Scan(
+			&i.ID,
 			&i.NewsID,
 			&i.ParentCommentID,
 			&i.Content,

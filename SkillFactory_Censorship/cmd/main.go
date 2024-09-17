@@ -27,7 +27,7 @@ func main() {
 	logger := zerolog.New(os.Stdout).Level(logLevel).With().Timestamp().Logger()
 
 	APIConfig := &api.Opts{
-		Addr: fmt.Sprintf("localhost:%v", cfg.APIPort),
+		Addr: fmt.Sprintf("0.0.0.0:%v", cfg.APIPort),
 		Log:  logger,
 	}
 

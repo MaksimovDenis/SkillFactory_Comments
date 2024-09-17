@@ -17,9 +17,10 @@ RUN apk add --no-cache libc6-compat
 COPY --from=compiling_stage /news/news /root/news
 
 COPY .env /root/.env
+COPY config.json /root/config.json 
 
 RUN chmod +x /root/news
 
 ENTRYPOINT ["/root/news"]
 
-EXPOSE 8080
+EXPOSE 8883

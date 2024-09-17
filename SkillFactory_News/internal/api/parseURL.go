@@ -19,16 +19,16 @@ type configRss struct {
 
 func (hdl *API) StartParseUrl() {
 
-	reader, err := os.ReadFile("./cmd/config.json")
+	reader, err := os.ReadFile("config.json")
 	if err != nil {
-		hdl.l.Info().Err(err).Msg("failed to read config RSS")
+		hdl.l.Error().Err(err).Msg("failed to read config RSS")
 	}
 
 	var config configRss
 
 	err = json.Unmarshal(reader, &config)
 	if err != nil {
-		hdl.l.Info().Err(err).Msg("failed to unmarshal config RSS")
+		hdl.l.Error().Err(err).Msg("failed to unmarshal config RSS")
 	}
 
 	chFeeds := make(chan []models.Feeds)

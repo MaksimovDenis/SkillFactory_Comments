@@ -46,7 +46,7 @@ func main() {
 	fmt.Println(cfg.APIPort)
 
 	APIConfig := &api.Opts{
-		Addr:    fmt.Sprintf("localhost:%v", cfg.APIPort),
+		Addr:    fmt.Sprintf("0.0.0.0:%v", cfg.APIPort),
 		Log:     apiLog,
 		Storage: storage,
 	}

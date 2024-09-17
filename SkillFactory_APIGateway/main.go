@@ -34,7 +34,7 @@ func main() {
 	apiLog := logger.With().Str("module", "api").Logger()
 
 	APIConfig := &api.Opts{
-		Addr:        fmt.Sprintf("localhost:%v", cfg.APIPort),
+		Addr:        fmt.Sprintf("0.0.0.0:%v", cfg.APIPort),
 		Log:         apiLog,
 		SwaggerFile: swaggerFile,
 	}
