@@ -22,4 +22,4 @@ RUN chmod +x /root/censorship
 
 ENTRYPOINT ["/root/censorship"]
 
-EXPOSE 8883
+EXPOSE 8080

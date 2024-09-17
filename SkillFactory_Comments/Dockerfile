@@ -22,4 +22,4 @@ RUN chmod +x /root/comments
 
 ENTRYPOINT ["./comments"]
 
-EXPOSE 8882
+EXPOSE 8080

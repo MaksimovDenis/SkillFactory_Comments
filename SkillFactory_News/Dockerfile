@@ -22,4 +22,4 @@ RUN chmod +x /root/news
 
 ENTRYPOINT ["/root/news"]
 
-EXPOSE 8883
+EXPOSE 8080

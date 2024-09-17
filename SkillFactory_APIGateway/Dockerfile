@@ -22,4 +22,4 @@ RUN chmod +x /root/controller
 
 ENTRYPOINT ["./controller"]
 
-EXPOSE 8881
+EXPOSE 8080

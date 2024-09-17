@@ -21,14 +21,14 @@ func (hdl *API) StartParseUrl() {
 
 	reader, err := os.ReadFile("./cmd/config.json")
 	if err != nil {
-		hdl.l.Fatal().Err(err).Msg("failed to read config RSS")
+		hdl.l.Info().Err(err).Msg("failed to read config RSS")
 	}
 
 	var config configRss
 
 	err = json.Unmarshal(reader, &config)
 	if err != nil {
-		hdl.l.Fatal().Err(err).Msg("failed to unmarshal config RSS")
+		hdl.l.Info().Err(err).Msg("failed to unmarshal config RSS")
 	}
 
 	chFeeds := make(chan []models.Feeds)
@@ -46,7 +46,7 @@ func (hdl *API) StartParseUrl() {
 
 	go func() {
 		for err := range chErrors {
-			hdl.l.Fatal().Err(err)
+			hdl.l.Info().Err(err)
 		}
 	}()
 }
