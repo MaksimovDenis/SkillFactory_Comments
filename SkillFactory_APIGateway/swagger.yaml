@@ -129,10 +129,10 @@ components:
     CreateComment:
       type: object
       properties:
-        news_id:
+        NewsID:
           type: integer
           description: ID of the associated news item
-        parent_comment_id:
+        ParentCommentID:
           type: integer
           description: ID of the parent comment (if any)
           nullable: true
@@ -140,7 +140,7 @@ components:
           type: string
           description: Content of the comment
       required:
-        - news_id
+        - NewsID
         - content
 
     Feeds:
